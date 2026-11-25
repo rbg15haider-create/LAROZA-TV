@@ -1,0 +1,40 @@
+name: Build LAROZA TV
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'LAROZA-TV-source.zip'
+      - '.github/workflows/main.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract project
+        run: |
+          unzip -q LAROZA-TV-source.zip -d source
+          chmod +x source/LAROZA-TV/gradlew
+
+      - name: Build APK
+        working-directory: source/LAROZA-TV
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LAROZA-TV-APK
+          path: source/LAROZA-TV/app/build/outputs/apk/debug/*.apk
