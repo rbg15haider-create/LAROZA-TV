@@ -31,7 +31,14 @@ jobs:
 
       - name: Build APK
         working-directory: source/LAROZA-TV
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          for attempt in 1 2 3; do
+            echo "Build attempt $attempt"
+            ./gradlew assembleDebug --stacktrace --max-workers=2 && exit 0
+            echo "Build failed. Waiting before retry..."
+            sleep $((attempt * 30))
+          done
+          exit 1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
